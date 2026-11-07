@@ -177,19 +177,26 @@
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
 
-      canvas.width = scaledViewport.width;
-      canvas.height = scaledViewport.height;
-      canvas.style.width = '100%';
-      canvas.style.height = 'auto';
-      canvas.style.display = 'block';
-      canvas.style.marginBottom = '16px';
+      const canvas = document.createElement('canvas');
+const context = canvas.getContext('2d');
 
-      container.appendChild(canvas);
+const outputScale = window.devicePixelRatio || 1;
 
-      await page.render({
-        canvasContext: context,
-        viewport: scaledViewport
-      }).promise;
+canvas.width = Math.floor(scaledViewport.width * outputScale);
+canvas.height = Math.floor(scaledViewport.height * outputScale);
+
+canvas.style.width = '100%';
+canvas.style.height = 'auto';
+canvas.style.display = 'block';
+canvas.style.marginBottom = '16px';
+
+container.appendChild(canvas);
+
+await page.render({
+  canvasContext: context,
+  viewport: scaledViewport,
+  transform: [outputScale, 0, 0, outputScale, 0, 0]
+}).promise;
     }
   });
 </script>
