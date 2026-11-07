@@ -167,38 +167,44 @@
 
   const container = document.getElementById('pdf-container');
 
-  pdfjsLib.getDocument('/agenda.pdf').promise.then(async (pdf) => {
-    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-      const page = await pdf.getPage(pageNumber);
-      const viewport = page.getViewport({ scale: 1 });
-      const scale = container.clientWidth / viewport.width;
-      const scaledViewport = page.getViewport({ scale });
+  async function loadPDF() {
+    try {
+      const pdf = await pdfjsLib.getDocument('/agenda.pdf').promise;
 
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+        const page = await pdf.getPage(pageNumber);
+        const viewport = page.getViewport({ scale: 1 });
+        const scale = container.clientWidth / viewport.width;
+        const scaledViewport = page.getViewport({ scale });
 
-      const canvas = document.createElement('canvas');
-const context = canvas.getContext('2d');
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
 
-const outputScale = window.devicePixelRatio || 1;
+        const outputScale = Math.min(window.devicePixelRatio || 1, 2);
 
-canvas.width = Math.floor(scaledViewport.width * outputScale);
-canvas.height = Math.floor(scaledViewport.height * outputScale);
+        canvas.width = Math.floor(scaledViewport.width * outputScale);
+        canvas.height = Math.floor(scaledViewport.height * outputScale);
 
-canvas.style.width = '100%';
-canvas.style.height = 'auto';
-canvas.style.display = 'block';
-canvas.style.marginBottom = '16px';
+        canvas.style.width = '100%';
+        canvas.style.height = 'auto';
+        canvas.style.display = 'block';
+        canvas.style.marginBottom = '16px';
 
-container.appendChild(canvas);
+        container.appendChild(canvas);
 
-await page.render({
-  canvasContext: context,
-  viewport: scaledViewport,
-  transform: [outputScale, 0, 0, outputScale, 0, 0]
-}).promise;
+        await page.render({
+          canvasContext: context,
+          viewport: scaledViewport,
+          transform: [outputScale, 0, 0, outputScale, 0, 0]
+        }).promise;
+      }
+    } catch (error) {
+      console.error('PDF loading error:', error);
+      container.textContent = 'Unable to load the agenda PDF.';
     }
-  });
+  }
+
+  loadPDF();
 </script>
 
 
